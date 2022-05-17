@@ -2,47 +2,53 @@ clear all, clc, close all
 
 %% 1 Observacion de una Trama de Bits
 Tb = 1e-9;
-A=1;
+A=2;
 Pa=0.5; % Probabilidad de Bit
 
 a = round(rand(500,1000));
 dim = size(a);
-for i = 1:dim(1)
-    for j = 1:dim(2)
-        if a(i,j) == 0
-            a(i,j)=-1;
-        end
-    end
-end
+% for i = 1:dim(1)
+%     for j = 1:dim(2)
+%         if a(i,j) == 0
+%             a(i,j)=-1;
+%         end
+%     end
+% end
 
 
 %% 2 Construccion de senial PCM s(t)
 for i = 1:dim(1)
-    [s(i,:) T(i,:)] = LineEncoder('uninrz',a(i,:),Tb,A);
+    [s(i,:) T(i,:)] = LineEncoder('polnrz',a(i,:),Tb,A);
 end
 figure
-plot(T(1,1:10000),s(1,1:10000),'LineWidth',2);grid on;
+plot(T(1,:),s(1,:),'LineWidth',2);grid on;
 title('Trama de Bits')
 xlabel('t (seg)')
 ylabel('s(t)')
 
-% 
-% 
-% tk=20; % Tiempo de Evaluacion
-% tk_tau=50;
-% % Autocorrelacion
-% mu = 0;
-% [c,lags] = xcorr(a(1,tk),a(1,tk_tau));
-% 
-% 
 %% 3 Calculo de Media Promediada
-timeAveragedMean = mean(s(1,:));
+for i=1:dim(1)
+    timeAveragedMean(i,:) = mean(s(i,:));
+end
+disp('La media Promediada obtenida es:');
+timeAveragedMean;
 
 %% 4 Calculo de la Autocorrelacion promediada
 [timeAveragedAutocorrlation,tau] = xcorr(s(1,:),'normalized');
 
 %% 5 Grafica de las Funciones ensemble y promediadas en tiempo
 [c,lags] = xcorr(s(:,20),s(:,30),'normalized');
+
+t_timeMean=[1:500];
+meanVR=zeros(1,500);
+
+figure
+plot(t_timeMean,timeAveragedMean,'b',t_timeMean,meanVR,'r','LineWidth',2);
+title('Función de Media Promediada y Valor Esperado de s(t)')
+legend('Media Promediada','Valor Esperado de s(t)')
+xlabel('$$\zeta, t$$','interpreter','latex')
+ylabel('$$<s(\zeta)>,E\{s(t)\}$$','interpreter','latex')
+
 
 figure
 subplot(2,1,1)
@@ -59,7 +65,7 @@ ylabel('$$\Re_{SS}(\tau)$$','interpreter','latex')
 
 %% 6 Determinacion de la Densidad Espectral de Potencia
 
-Y = fft(timeAveragedAutocorrlation)
+Y = fft(timeAveragedAutocorrlation);
 Fs = 1/Tb;            % Sampling frequency                    
 L = length(tau);             % Length of signal
 f = Fs*(0:(L/2))/L;
@@ -67,19 +73,28 @@ P2 = abs(Y/L);
 P1 = P2(1:L/2+1);
 P1(2:end-1) = 2*P1(2:end-1);
 
+X = fft(s(1,:)');
+Fs = 1/Tb;            % Sampling frequency 
+[n m]=size(s(1,:));
+L_x = m;             % Length of signal
+f_x = Fs*(0:(L_x/2))/L_x;
+P2_x = abs(X/L_x);
+P1_x = P2_x(1:L_x/2+1);
+P1_x(2:end-1) = 2*P1_x(2:end-1);
+
 
 %% 7 Graficas de PSD y Periodograma
-periodograma = (1/L)*(P1.^2);
+periodograma = (1/L_x)*(P1_x.^2);
 
 figure
 subplot(2,1,1)
-plot(f(1:L/4),P1(1:L/4)) 
+plot(f,P1) 
 title('Densidad Espectral de potencia')
 xlabel('f (Hz)')
 ylabel('$$S(f)$$','interpreter','latex')
 
 subplot(2,1,2)
-plot(f(1:L/4),periodograma(1:L/4)) 
-title('Estimación de S(f)')
+plot(f_x(1:L_x/4),periodograma(1:L_x/4)) 
+title('Periodograma')
 xlabel('f [Hz]')
 ylabel('$$\hat{S}_{SS}(f)$$','interpreter','latex')

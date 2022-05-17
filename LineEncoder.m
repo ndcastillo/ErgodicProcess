@@ -20,9 +20,6 @@ function [x T] = LineEncoder(type,inbits,Tb,A)
 %
 %
 
-%---Implemented by ASHISH MESHRAM
-%---meetashish85@gmail.com http://www.facebook.com/ashishmeet
-
 %---Checking input arguments
 if nargin<4, A = 1;end
 if nargin<3, Tb = 1e-9;end

@@ -88,13 +88,13 @@ periodograma = (1/L_x)*(P1_x.^2);
 
 figure
 subplot(2,1,1)
-plot(f,P1) 
+plot(f(1:3e3),P1(1:3e3)) 
 title('Densidad Espectral de potencia')
 xlabel('f (Hz)')
 ylabel('$$S(f)$$','interpreter','latex')
 
 subplot(2,1,2)
-plot(f_x(1:L_x/4),periodograma(1:L_x/4)) 
+plot(f_x(1:2e3),periodograma(1:2e3)) 
 title('Periodograma')
 xlabel('f [Hz]')
 ylabel('$$\hat{S}_{SS}(f)$$','interpreter','latex')
